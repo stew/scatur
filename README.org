@@ -1,0 +1,110 @@
+#+TITLE:     README.org
+#+AUTHOR:    Mike (stew) O'Connor
+#+EMAIL:     stew@vireo.org
+#+DATE:      2012-05-19 Sat
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+* scatur
+
+  This is a *NOT YET WORKING* attempt at implementing Turing machines
+  using the scala type system, which are run completely by the
+  compiler.
+
+  This is probably not useful, other than being an interesting
+  exploration of what is possible with the scala type system.
+
+** The Turing Machine
+
+  The turing machine we are trying to implement is a single tape
+  turing machine.  The tape is made up of cells which can be in one of
+  three states: One, Zero, X.
+
+  The machine is always looking at one particular cell.
+
+  The machine is a finite state machine.  Each state has transitions
+  defined which describe the next state of the machine based on the
+  current state of the machine and the current cell being looked at.
+
+** The Finite State Machine
+
+   There are three types of states the state machine might be in:
+
+   - Halt 
+     The program terminates when reaching this state, there is only
+     one instance of this state
+
+   - LeftState
+     When the machine arrives in a state which is a left state, the 
+     tape is re-positioned so that the machine is looking at a cell 
+     which is to the left of the previous current cell
+
+   - RightState
+     When the machine arrives in a state which is a left state, the 
+     tape is re-positioned so that the machine is looking at a cell 
+     which is to the left of the previous current cell
+     
+** Examples
+*** AddOne
+    
+    Here we describe a simple machine which can add one to a binary
+    number.
+
+    It is assumed that the Machine starts looking at the most
+    significant byte of a number, with the less significant digits to
+    the right.  The program should increment this binary number and
+    terminate with the machine looking at the most significant digit.
+
+    The Machine starts in the FindEnd state.  It reains in the find
+    end state until we find the cell to the right of the least
+    significant digit.
+
+    The machine transitions to the Adding state.  During the adding
+    state, it scans to the left, looking for a 0 or X it can replace
+    with a 1. After which we have successfully incremented the number.
+
+    Then the machine Enters the FindBeginning state, which just scans
+    to the left looking for and X, at which point we are one cell to 
+    the left of the most significant digit.
+
+    Then the RightOneMore state just advances the tape to the right so
+    we are pointing at the MSD.
+
+
+    In this diagram, state transitions are labeled N:M which means,
+    follow this transition if the tape is pointing at N, and replace
+    the N with M.
+
+        1:1    0:0
+       +----+ +----+
+       |    | |    |
+       |    v |    v
+    +- ------------ -+
+    | FindEnd(right) |
+    +----------------+
+            |
+            | X:X
+            |
+            v
+    +-------      -+
+    | Adding(left) |
+    +-------      -+                  
+     X:1 |  |     ^ 
+     0:1 |  | 1:0 | 
+         |  +-----+ 
+         V                                
+    +---------------------+     
+    | FindBeginning(left) |
+    +---------------------+             
+             |
+             | X:X 
+             |
+             V                 0:0
+    +---------------------+    1:0       +------+ 
+    | RightOneMore(right) | -----------> | Halt | 
+    +---------------------+              +------+
+
