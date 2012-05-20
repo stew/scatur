@@ -81,6 +81,7 @@
     follow this transition if the tape is pointing at N, and replace
     the N with M.
 
+#+BEGIN_EXAMPLE    
         1:1    0:0
        +----+ +----+
        |    | |    |
@@ -109,6 +110,7 @@
     +---------------------+    1:0       +------+ 
     | RightOneMore(right) | -----------> | Halt | 
     +---------------------+              +------+
+#+END_EXAMPLE
 
 *** AddOne implementation
 
