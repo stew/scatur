@@ -193,3 +193,9 @@
 #+END_EXAMPLE
 
     And we verify that that our Turing machine added one to 0b1101 and got 0b1110
+
+** Credits:
+
+I couldn't have done this without the pioneering work that Miles Sabin
+has done in this area. The implementaion of the heterogeneous lists
+that encode the tape are lifted right from his [[https://github.com/milessabin/shapeless][shapeless]] project.
