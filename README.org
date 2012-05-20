@@ -11,9 +11,11 @@
 
 * scatur
 
-  This is a *NOT YET WORKING* attempt at implementing Turing machines
-  using the scala type system, which are run completely by the
-  compiler.
+  This project creates implements a Turing Machine using the scala
+  type system, which are run completely by the compiler.  The turing
+  machine and initial state are encoded using the scala type system
+  and implicit defs and implicit vals, and the final state of the
+  Turing machine (if one can be calculated) is determined *at compile time*
 
   This is probably not useful, other than being an interesting
   exploration of what is possible with the scala type system.
