@@ -108,3 +108,11 @@
     | RightOneMore(right) | -----------> | Halt | 
     +---------------------+              +------+
 
+*** AddOne implementation
+
+    The implementation of the AddOne turing machine is found in src/test/scala/add.scala
+
+    First we create state objects to represent all the states of the turing machine:
+
+
+    

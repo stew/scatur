@@ -1,5 +1,11 @@
 package turing
 
+/** 
+* Cell
+*   
+* The tape is made of of a linear sequence of Cells.
+* There are three types of cells, X (empty), One, Zero
+*/
 sealed trait Cell
 
 trait X extends Cell
@@ -19,6 +25,12 @@ case object One extends One
  */
 case class Tape[+L <: Cells, +C <: Cell, +R <: Cells](left: L, current: C, right: R)
 
+/**
+ * TapeOps
+ *
+ * pimp the Tape object to provice the run method which actually
+ * calculates the result
+ */
 final class TapeOps[L <: Cells, C <: Cell, R <: Cells](t: Tape[L,C,R]) {
   def run[S <: MachineState](s: S)(implicit rs: RunningState[L,C,R,S]) : rs.Out = rs(t,s)
 }
@@ -27,13 +39,25 @@ object Tape {
   implicit def tapeOps[L <: Cells, C <: Cell, R <: Cells](t : Tape[L,C,R]) : TapeOps[L,C,R] = new TapeOps(t)
 }
 
-
+/** 
+ * Cells
+ *   
+ * a heterogenous list of cells which are either X, One, or Zero
+ *
+ * This is used to store the list of cells to the right or left
+ * of the current cell
+ */
 sealed trait Cells
 
 final case class ::[+H <: Cell, +T <: Cells](head: H, tail: T) extends Cells {
   override def toString = head+" :: "+tail.toString
 }
 
+/** 
+ * TNil
+ *   
+ * marks either the left or right end of a tape
+ */
 trait TNil extends Cells {
   def ::[H <: Cell](h: H) = turing.::(h,this)
   override def toString = "TapeEnd"
@@ -109,45 +133,85 @@ object RunningState {
   }
 }
 
+/** 
+ * RunningStateAux
+ *   
+ * this is just a rearrangement of the above which has our much desired
+ * Out type as another type argument
+ */
 trait RunningStateAux[TL <: Cells, TC <: Cell, TR <: Cells, S <: MachineState, Out] {
-  def apply(tape: Tape[TL, TC, TR], state: S): Out
+def apply(tape: Tape[TL, TC, TR], state: S): Out
 }
 
 object RunningStateAux {
+  /** 
+  * halted
+  *
+  * provide an implicit RunningStateAux object for any Tape for a running
+  * machine in the Halt state.  If a machine enters the halt state, we now
+  * know what the Tape in the Out position looks like
+  */ 
   implicit def halted[TL <: Cells, 
                       TC <: Cell, 
-                      TR <: Cells] : RunningStateAux[TL, TC, TR, Halt, Tape[TL, TC, TR]] =
-    new RunningStateAux[TL, TC, TR, Halt, Tape[TL, TC, TR]] {
-      def apply(tape: Tape[TL, TC, TR], state: Halt): Tape[TL, TC, TR] = tape
+                      TR <: Cells] : RunningStateAux[TL, TC, TR, Halt.type, Tape[TL, TC, TR]] =
+    new RunningStateAux[TL, TC, TR, Halt.type, Tape[TL, TC, TR]] {
+      def apply(tape: Tape[TL, TC, TR], state: Halt.type): Tape[TL, TC, TR] = tape
     }
 
+
+  /** 
+   * previousLeftState
+   *
+   * if we have an implicit Transition available that takes us from some
+   * LeftState state to a state for which there is alread an implicit
+   * RunningStateAux, we supply an implicit RunningAuxState for the the
+   * tape in the state it would be in before the LeftState was reached
+   * 
+  */ 
   implicit def previousLeftState[TLH <: Cell, 
                                  TLT <: Cells, 
                                  TC <: Cell, 
                                  TR <: Cells,
                                  UC <: Cell,
-                                 S <: MachineState,
+                                 S <: LeftState,
                                  N <: MachineState,
                                  Out]
   (implicit transition: Transition[S, N, TLH, UC],
    nextRunningState: RunningStateAux[TLT,UC,TC :: TR, N, Out]) =
      new RunningStateAux[TLH :: TLT, TC, TR, S, Out] {
+       // remove the head from the tape on the left of current the
+       // center of the tape becomes whatever the state transition is
+       // supposed to write
+       // right of the tape gets the previous center pushed onto the head
        def apply(tape: Tape[TLH :: TLT, TC, TR], state: S) : Out = {
          nextRunningState(Tape(tape.left.tail, transition.write, turing.::(tape.current, tape.right)), transition.toState)
        }
      }
 
+  /** 
+   * previousRightState
+   *
+   * if we have an implicit Transition available that takes us from some
+   * RightState state to a state for which there is alread an implicit
+   * RunningStateAux, we supply an implicit RunningAuxState for the the
+   * tape in the state it would be in before the RightState was reached
+   * 
+   */ 
   implicit def previousRightState[TL <: Cells, 
                                   TC <: Cell, 
                                   TRH <: Cell, 
                                   TRT <: Cells,
                                   UC <: Cell,
-                                  S <: MachineState,
+                                  S <: RightState,
                                   N <: MachineState,
                                   Out]
   (implicit transition: Transition[S, N, TRH, UC],
    nextRunningState: RunningStateAux[TC :: TL, UC, TRT, N, Out]) =
      new RunningStateAux[TL, TC, TRH :: TRT, S, Out] {
+       // remove the head from the tape on the right of current the
+       // center of the tape becomes whatever the state transition is
+       // supposed to write
+       // left of the tape gets the previous center pushed onto the head
        def apply(tape: Tape[TL, TC, TRH :: TRT], state: S) : Out = {
          nextRunningState(Tape(turing.::(tape.current, tape.left), transition.write, tape.right.tail), transition.toState)
        }
