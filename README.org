@@ -59,7 +59,7 @@
     the right.  The program should increment this binary number and
     terminate with the machine looking at the most significant digit.
 
-    The Machine starts in the FindEnd state.  It reains in the find
+    The Machine starts in the FindEnd state.  It remains in the find
     end state until we find the cell to the right of the least
     significant digit.
 
@@ -195,7 +195,7 @@
 * Credits:
 
 I couldn't have done this without the pioneering work that Miles Sabin
-has done in this area. The implementaion of the heterogeneous lists
+has done in this area. The implementation of the heterogeneous lists
 that encode the tape are lifted right from his [[https://github.com/milessabin/shapeless][shapeless]] project.
 
 * License
