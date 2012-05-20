@@ -62,5 +62,4 @@ object TestAdd extends App {
   // if this compiles, then "completed" is the type we think it is
   typed[Tape[X :: TNil, One, One :: One :: Zero :: X :: X :: TNil ]]( completed)
 
-
 }

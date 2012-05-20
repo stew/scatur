@@ -9,8 +9,6 @@
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
 
-* scatur
-
   This project creates implements a Turing Machine using the scala
   type system, which are run completely by the compiler.  The turing
   machine and initial state are encoded using the scala type system
@@ -20,7 +18,7 @@
   This is probably not useful, other than being an interesting
   exploration of what is possible with the scala type system.
 
-** The Turing Machine
+* The Turing Machine
 
   The turing machine we are trying to implement is a single tape
   turing machine.  The tape is made up of cells which can be in one of
@@ -32,7 +30,7 @@
   defined which describe the next state of the machine based on the
   current state of the machine and the current cell being looked at.
 
-** The Finite State Machine
+* The Finite State Machine
 
    There are three types of states the state machine might be in:
 
@@ -50,8 +48,8 @@
      tape is re-positioned so that the machine is looking at a cell 
      which is to the left of the previous current cell
      
-** Examples
-*** AddOne
+* Examples
+** AddOne
     
     Here we describe a simple machine which can add one to a binary
     number.
@@ -112,7 +110,7 @@
     +---------------------+              +------+
 #+END_EXAMPLE
 
-*** AddOne implementation
+** AddOne implementation
 
     The implementation of the AddOne turing machine is found in src/test/scala/add.scala
 
@@ -194,13 +192,13 @@
 
     And we verify that that our Turing machine added one to 0b1101 and got 0b1110
 
-** Credits:
+* Credits:
 
 I couldn't have done this without the pioneering work that Miles Sabin
 has done in this area. The implementaion of the heterogeneous lists
 that encode the tape are lifted right from his [[https://github.com/milessabin/shapeless][shapeless]] project.
 
-** License
+* License
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
