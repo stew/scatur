@@ -117,4 +117,77 @@
     First we create state objects to represent all the states of the turing machine:
 
 
-    
+#+BEGIN_EXAMPLE    
+  class FindEnd extends RightState
+  case object FindEnd extends FindEnd
+
+  class Adding extends LeftState
+  case object Adding extends Adding
+  
+  class FindBeginning extends LeftState
+  case object FindBeginning extends FindBeginning
+
+  class RightOneMore extends RightState
+  case object RightOneMore extends RightOneMore
+
+#+END_EXAMPLE
+
+    Then we add Transitions between all the states as implicit vals:
+
+#+BEGIN_EXAMPLE    
+  implicit val findEndOne = Transition[FindEnd.type, FindEnd.type, One.type, One.type](FindEnd,FindEnd,One)
+  implicit val findEndZero = Transition[FindEnd.type, FindEnd.type, Zero.type, Zero.type](FindEnd,FindEnd,Zero)
+  implicit val findEndX = Transition[FindEnd.type, Adding.type, X.type, X.type](FindEnd,Adding,X)
+
+
+  implicit val addingOne = Transition[Adding.type, Adding.type, One.type, Zero.type](Adding,Adding,Zero)
+  implicit val addingZero = Transition[Adding.type, FindBeginning.type, Zero.type, One.type](Adding,FindBeginning,One)
+  implicit val addingX = Transition[Adding.type, FindBeginning.type, X.type, One.type](Adding,FindBeginning,One)
+
+
+  implicit val fbOne = Transition[FindBeginning.type, FindBeginning.type, One.type, One.type](FindBeginning,FindBeginning,One)
+
+  implicit val fbZero = Transition[FindBeginning.type, FindBeginning.type, Zero.type, Zero.type](FindBeginning,FindBeginning,Zero)
+
+  implicit val fbX = Transition[FindBeginning.type, RightOneMore.type, X.type, X.type](FindBeginning,RightOneMore,X)
+
+  implicit val romX = Transition[RightOneMore.type, Halt.type, X.type, X.type](RightOneMore,Halt,X)
+  implicit val romOne = Transition[RightOneMore.type, Halt.type, One.type, One.type](RightOneMore,Halt,One)
+  implicit val romZero = Transition[RightOneMore.type, Halt.type, Zero.type, Zero.type](RightOneMore,Halt,Zero)
+#+END_EXAMPLE
+
+    Then we create the starting tape that has the number 0b1101 in the
+    expected starting position
+
+#+BEGIN_EXAMPLE    
+  val startTape = Tape( X :: TNil, One, One :: Zero :: One :: X :: X :: TNil)
+
+#+END_EXAMPLE
+
+    We create a val named completed which is the result of running the
+    Turing machine:
+
+#+BEGIN_EXAMPLE    
+  val completed = startTape.run(FindEnd)
+#+END_EXAMPLE
+
+
+    HOWEVER! we don't actually have to run the program.  In the
+    process of compiling this program, the scalac compiler has already
+    figured out what the type of completed is, which is the Tape at
+    the time that the Turing Machine halts.  And since the Tape has
+    all of the cells encoded in the type, we already know what the
+    ending state of the Tape is. 
+
+    We can verify at compile time that we get the result we are expecting:
+
+#+BEGIN_EXAMPLE    
+  // this is a utility to witness that a type is the type we think it
+  // is without influencing the compiler's type inference
+  def typed[T](t : => T) {}
+
+  // if this compiles, then "completed" is the type we think it is
+  typed[Tape[X :: TNil, One, One :: One :: Zero :: X :: X :: TNil ]]( completed)
+#+END_EXAMPLE
+
+    And we verify that that our Turing machine added one to 0b1101 and got 0b1110
